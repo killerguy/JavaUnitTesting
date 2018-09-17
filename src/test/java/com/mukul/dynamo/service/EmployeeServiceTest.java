@@ -1,7 +1,10 @@
 package com.mukul.dynamo.service;
 
+import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
 import com.mukul.dynamo.domain.Employee;
 import com.mukul.dynamo.domain.EmployeeStatus;
+import com.mukul.dynamo.exception.BadRequestException;
+import com.mukul.dynamo.exception.DuplicateRequestException;
 import com.mukul.dynamo.repository.EmployeeRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,13 +17,13 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EmployeeServiceTest {
 
     public static final int ANY_DEPT_ID = 2;
-    public static final int ANY_ID = 2;
+    public static final String ANY_ID = "2";
 
     @InjectMocks
     private EmployeeService employeeService;
@@ -75,6 +78,37 @@ public class EmployeeServiceTest {
 
         assertThat(enabled, is(false));
     }
+
+    @Test(expected = DuplicateRequestException.class)
+    public void shouldThrowDuplicateRequestExceptionIfToggleWithNameAlreadyExists() {
+        Employee employee = buildEmployee(EmployeeStatus.ACTIVE.name(), 5);
+        doThrow(ConditionalCheckFailedException.class).when(employeeRepository).createIfNotExists(employee);
+
+        employeeService.createEmployee(employee);
+
+        verify(employeeRepository).createIfNotExists(employee);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void shouldThrowBadRequestExceptionIfToggleWithInvalidData() {
+        Employee employee = buildEmployee(EmployeeStatus.ACTIVE.name(), 5);
+        doThrow(BadRequestException.class).when(employeeRepository).createIfNotExists(employee);
+
+        employeeService.createEmployee(employee);
+
+        verify(employeeRepository).createIfNotExists(employee);
+    }
+
+    @Test
+    public void shouldCreateTheToggle() {
+        Employee employee = buildEmployee(EmployeeStatus.ACTIVE.name(), 5);
+        doNothing().when(employeeRepository).createIfNotExists(employee);
+
+        employeeService.createEmployee(employee);
+
+        verify(employeeRepository).createIfNotExists(employee);
+    }
+
 
     private Employee buildEmployee(String status, int deptId) {
         Employee employee = new Employee();

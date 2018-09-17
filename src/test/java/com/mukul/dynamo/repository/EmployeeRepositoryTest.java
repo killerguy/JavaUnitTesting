@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class EmployeeRepositoryTest {
 
-    public static final int ANY_ID = 05;
+    public static final String ANY_ID = "05";
     @InjectMocks
     private EmployeeRepository employeeRepository;
 
