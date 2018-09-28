@@ -5,6 +5,8 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBSaveExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
+import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
 import com.amazonaws.services.dynamodbv2.model.ExpectedAttributeValue;
@@ -12,6 +14,7 @@ import com.mukul.dynamo.domain.Employee;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.amazonaws.util.ImmutableMapParameter.of;
@@ -55,5 +58,11 @@ public class EmployeeRepository {
         saveExpression.setExpected(of(attrName,
                 new ExpectedAttributeValue(new AttributeValue(attrValue)).withComparisonOperator(operator)));
         return saveExpression;
+    }
+
+    public List<Employee> getAllEmployees() {
+        PaginatedScanList<Employee> paginatedScanList = mapper.scan(Employee.class, new DynamoDBScanExpression());
+        paginatedScanList.loadAllResults();
+        return paginatedScanList;
     }
 }

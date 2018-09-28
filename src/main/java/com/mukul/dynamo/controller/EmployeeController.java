@@ -4,6 +4,7 @@ import com.mukul.dynamo.domain.Employee;
 import com.mukul.dynamo.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -21,6 +22,11 @@ public class EmployeeController {
     @PostMapping(value = "/employees", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     public void createEmployee(@RequestBody Employee employee) {
         employeeService.createEmployee(employee);
+    }
+
+    @GetMapping(value = "/employees", produces = APPLICATION_JSON_VALUE)
+    public List<Employee> getAllEmployees() {
+        return employeeService.getAllEmployees();
     }
 
 }

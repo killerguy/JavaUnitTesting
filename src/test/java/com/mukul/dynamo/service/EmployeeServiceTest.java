@@ -12,6 +12,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
@@ -71,7 +73,7 @@ public class EmployeeServiceTest {
     }
 
     @Test
-    public void shouldReturnFalseIfToggleIsNotPresentInDB() {
+    public void shouldReturnFalseIfEmployeeIsNotPresentInDB() {
         when(employeeRepository.getEmployeeDetails(ANY_ID)).thenReturn(ofNullable(null));
 
         boolean enabled = employeeService.isActiveEmployee(ANY_ID);
@@ -80,7 +82,7 @@ public class EmployeeServiceTest {
     }
 
     @Test(expected = DuplicateRequestException.class)
-    public void shouldThrowDuplicateRequestExceptionIfToggleWithNameAlreadyExists() {
+    public void shouldThrowDuplicateRequestExceptionIfEmployeeWithNameAlreadyExists() {
         Employee employee = buildEmployee(EmployeeStatus.ACTIVE.name(), 5);
         doThrow(ConditionalCheckFailedException.class).when(employeeRepository).createIfNotExists(employee);
 
@@ -90,7 +92,7 @@ public class EmployeeServiceTest {
     }
 
     @Test(expected = BadRequestException.class)
-    public void shouldThrowBadRequestExceptionIfToggleWithInvalidData() {
+    public void shouldThrowBadRequestExceptionIfEmployeeWithInvalidData() {
         Employee employee = buildEmployee(EmployeeStatus.ACTIVE.name(), 5);
         doThrow(BadRequestException.class).when(employeeRepository).createIfNotExists(employee);
 
@@ -100,7 +102,7 @@ public class EmployeeServiceTest {
     }
 
     @Test
-    public void shouldCreateTheToggle() {
+    public void shouldCreateNewEmployeeDetails() {
         Employee employee = buildEmployee(EmployeeStatus.ACTIVE.name(), 5);
         doNothing().when(employeeRepository).createIfNotExists(employee);
 
@@ -109,6 +111,16 @@ public class EmployeeServiceTest {
         verify(employeeRepository).createIfNotExists(employee);
     }
 
+    @Test
+    public void shouldReturnListOfAllEmployeeDetails() {
+        List<Employee> expectedEmployeeList = Arrays.asList(buildEmployee(EmployeeStatus.ACTIVE.name(), 2), buildEmployee(EmployeeStatus.ACTIVE.name(), 1));
+        when(employeeRepository.getAllEmployees()).thenReturn(expectedEmployeeList);
+
+        List<Employee> actualEmployeeList = employeeService.getAllEmployees();
+
+        verify(employeeRepository).getAllEmployees();
+        assertThat(expectedEmployeeList, is(actualEmployeeList));
+    }
 
     private Employee buildEmployee(String status, int deptId) {
         Employee employee = new Employee();

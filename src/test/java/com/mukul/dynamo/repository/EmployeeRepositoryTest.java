@@ -1,10 +1,8 @@
 package com.mukul.dynamo.repository;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBSaveExpression;
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedScanList;
 import com.mukul.dynamo.domain.Employee;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +14,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import static junit.framework.Assert.assertEquals;
@@ -24,7 +23,7 @@ import static org.joda.time.DateTimeUtils.setCurrentMillisFixed;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -36,6 +35,8 @@ public class EmployeeRepositoryTest {
 
     @Mock
     private DynamoDBMapper mapper;
+    @Mock
+    PaginatedScanList paginatedScanList;
 
     ArgumentCaptor<Employee> employeeCapture;
     ArgumentCaptor<DynamoDBSaveExpression> dDBExpressionCaptor;
@@ -71,6 +72,15 @@ public class EmployeeRepositoryTest {
         assertThat(actualDynamoData.isPresent(), is(false));
     }
 
+    @Test
+    public void shouldReturnAlEmployeeDetailsFromDynamo() throws Exception {
+        when(mapper.scan(any(), any())).thenReturn(paginatedScanList);
+
+        List<Employee> actualEmployees = employeeRepository.getAllEmployees();
+
+        verify(paginatedScanList).loadAllResults();
+        assertThat(actualEmployees, is(paginatedScanList));
+    }
 
     private Employee buildEmployee() {
         Employee employee = new Employee();

@@ -1,21 +1,18 @@
 package com.mukul.dynamo.service;
 
 import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException;
-import com.mukul.dynamo.domain.Department;
 import com.mukul.dynamo.domain.DepartmentEnum;
 import com.mukul.dynamo.domain.Employee;
-import com.mukul.dynamo.domain.EmployeeStatus;
 import com.mukul.dynamo.exception.BadRequestException;
 import com.mukul.dynamo.exception.DuplicateRequestException;
 import com.mukul.dynamo.repository.EmployeeRepository;
-import javafx.scene.control.Toggle;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
-import static com.mukul.dynamo.domain.EmployeeStatus.*;
+import static com.mukul.dynamo.domain.EmployeeStatus.ACTIVE;
 import static java.lang.String.format;
 
 public class EmployeeService {
@@ -47,10 +44,15 @@ public class EmployeeService {
         try {
             employeeRepository.createIfNotExists(employee);
         } catch (ConditionalCheckFailedException ex) {
-            String errorMessage = format(DUPLICATE_EMPLOYEE_ERROR_MESSAGE, employee.getFirstName()+employee.getLastName());
+            String errorMessage = format(DUPLICATE_EMPLOYEE_ERROR_MESSAGE, employee.getFirstName() + employee.getLastName());
             throw new DuplicateRequestException(errorMessage);
         } catch (Exception ex) {
             throw new BadRequestException(BAD_REQUEST);
         }
     }
+
+    public List<Employee> getAllEmployees() {
+        return employeeRepository.getAllEmployees();
+    }
+
 }
